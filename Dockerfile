@@ -6,9 +6,9 @@ COPY . .
 
 RUN go mod download
 
-RUN GOOS=linux go build -o wsclient -ldflags "-linkmode external -extldflags -static" -a *.go
+RUN GOOS=linux CGO_ENABLED=0 go build -o wsclient -tags netgo -ldflags "-s -w -extldflags -static" -a *.go
 
-FROM gcr.io/distroless/base:nonroot
+FROM gcr.io/distroless/static:nonroot
 
 COPY --from=0 /app/wsclient /wsclient
 
