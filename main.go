@@ -24,26 +24,6 @@ func connectRemoteWebsocket(urlStr string) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-// func connect(urlStr string) error {
-// 	conn, _, err := websocket.DefaultDialer.Dial(urlStr, http.Header{})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	// fmt.Printf("%s: %s\n", name, resp.Status)
-// 	for {
-// 		// _, msg, err := conn.ReadMessage()
-// 		// if err != nil {
-// 		// 	return err
-// 		// }
-// 		// fmt.Println(string(msg))
-// 		var mesg EditMessage
-// 		err := conn.ReadJSON(&mesg)
-// 		if err == nil {
-// 			messageCache = append(messageCache, mesg)
-// 		}
-// 	}
-// }
-
 func aggregateByInterval(aggregationIntervalDuration, backlogDuration time.Duration, c *websocket.Conn) error {
 	// set up backlog timestamp limit
 	backlogTimestamp := time.Now().Add(-backlogDuration)
