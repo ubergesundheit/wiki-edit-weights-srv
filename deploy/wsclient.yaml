@@ -1,0 +1,92 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wsclient
+  namespace: wsclient
+  labels:
+    app.kubernetes.io/name: wsclient
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: wiki-diff-srv.pape.dev
+    http:
+      paths:
+      - path: /de(/|$)(.*)
+        backend:
+          serviceName: wsclient
+          servicePort: ws-german
+      - path: /en(/|$)(.*)
+        backend:
+          serviceName: wsclient
+          servicePort: ws-english
+  tls:
+  - hosts:
+    - wiki-diff-srv.pape.dev
+    secretName: wsclient-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: wsclient-tls
+  namespace: wsclient
+  labels:
+    app.kubernetes.io/name: wsclient
+spec:
+  secretName: wsclient-tls
+  commonName: wiki-diff-srv.pape.dev
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wsclient
+  namespace: wsclient
+  labels:
+    app.kubernetes.io/name: wsclient
+spec:
+  ports:
+    - name: ws-english
+      port: 8080
+      targetPort: ws-english
+    - name: ws-german
+      port: 8090
+      targetPort: ws-german
+  selector:
+    app.kubernetes.io/name: wsclient
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wsclient
+  namespace: wsclient
+  labels:
+    app.kubernetes.io/name: wsclient
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wsclient
+    spec:
+      containers:
+      - name: wsclient-english
+        image: quay.io/geraldpape/wiki-edit-weights-srv:latest
+        args:
+          - -addr
+          - :8080
+          - ws://wikimon.hatnote.com:9000
+        ports:
+        - name: ws-english
+          containerPort: 8080
+      - name: wsclient-german
+        image: quay.io/geraldpape/wiki-edit-weights-srv:latest
+        args:
+          - -addr
+          - :8090
+          - ws://wikimon.hatnote.com:9010
+        ports:
+        - name: ws-german
+          containerPort: 8090
