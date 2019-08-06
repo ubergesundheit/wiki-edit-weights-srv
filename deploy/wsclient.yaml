@@ -73,7 +73,7 @@ spec:
     spec:
       containers:
       - name: wsclient-english
-        image: quay.io/geraldpape/wiki-edit-weights-srv:latest
+        image: quay.io/geraldpape/wiki-edit-weights-srv:v0.1.0
         args:
           - -addr
           - :8080
@@ -82,7 +82,7 @@ spec:
         - name: ws-english
           containerPort: 8080
       - name: wsclient-german
-        image: quay.io/geraldpape/wiki-edit-weights-srv:latest
+        image: quay.io/geraldpape/wiki-edit-weights-srv:v0.1.0
         args:
           - -addr
           - :8090
