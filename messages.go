@@ -11,7 +11,7 @@ var messageCache []EditMessage
 
 type EditMessage struct {
 	Timestamp  time.Time `json:"interval"`
-	ChangeSize int `json:"change_size"`
+	ChangeSize int       `json:"change_size"`
 }
 
 func (e *EditMessage) UnmarshalJSON(jsonBytes []byte) error {
