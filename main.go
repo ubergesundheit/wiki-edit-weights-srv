@@ -27,6 +27,9 @@ func connectRemoteWebsocket(urlStr string) (*websocket.Conn, error) {
 func aggregateByInterval(aggregationIntervalDuration, backlogDuration time.Duration, c *websocket.Conn) error {
 	// set up backlog timestamp limit
 	backlogTimestamp := time.Now().Add(-backlogDuration)
+	// synchronize backlock timestamp with the aggregation interval
+	// by subtracting the remainder of the division between the backlog timestamp
+	// and the aggregation interval
 	backlogTimestamp = backlogTimestamp.Add(-time.Duration(backlogTimestamp.UnixNano() % int64(aggregationIntervalDuration)))
 	// set up step timestamp
 	backlogStepTimestamp := backlogTimestamp.Add(aggregationIntervalDuration)
@@ -59,6 +62,8 @@ func aggregateByInterval(aggregationIntervalDuration, backlogDuration time.Durat
 
 	AggregateLoop:
 		for i := len(messageCache) - 1; i >= 0; i-- {
+			// iterate backwards until the stored timestamp is no longer before
+			// the current timestamp
 			if messageCache[i].Timestamp.After(currTs) {
 				changeSize += messageCache[i].ChangeSize
 			} else {
@@ -70,6 +75,7 @@ func aggregateByInterval(aggregationIntervalDuration, backlogDuration time.Durat
 			return err
 		}
 
+		// sleep to match the next aggregation interval
 		time.Sleep(time.Duration(int64(aggregationIntervalDuration) - time.Now().UnixNano()%int64(aggregationIntervalDuration)))
 	}
 }
